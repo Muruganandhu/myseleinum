@@ -60,7 +60,8 @@ namespace MySeleniumProject
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Fatal Error: {ex.Message}");
+                Console.WriteLine($"Fatal Error main: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
             }
             finally
             {
