@@ -148,53 +148,86 @@ namespace MySeleniumProject
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error occurred: {ex.Message}");
 
+                // 1. Take the screenshot
+                if (driver is ITakesScreenshot ts)
+                {
+                    var screenshot = ts.GetScreenshot();
+                    string path = Path.Combine(Directory.GetCurrentDirectory(), "error_screenshots");
+                    if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+                    string fileName = $"failure_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+                    screenshot.SaveAsFile(Path.Combine(path, fileName));
+                    Console.WriteLine($"Screenshot saved: {fileName}");
+                }
+                throw; // Re-throw so GitHub Actions knows the job failed
             }
 
-            driver.Navigate().GoToUrl($"https://gocharting.com/terminal?ticker=NSE:{Symbol}");
-
-            await Task.Delay(7000); // wait for chart to load
-            var min3 = driver.FindElement(By.Id("interval-selector"));//("interval-selector-btn"));
-            min3.Click();
-            var mins3 = driver.FindElement(By.XPath("//*[@title='1 Minute']"));
-            mins3.Click();
-
-            Actions actions = new Actions(driver);
-
-            // Press ALT + D
-            //actions
-            //    .KeyDown(Keys.Alt)
-            //    .SendKeys("1")
-            //    .KeyUp(Keys.Alt)
-            //    .Perform();
-
-            var moreSettings = driver.FindElement(By.Id("more-features-btn"));
-            moreSettings.Click();
-            var isExcel = driver.FindElement(By.Id("Excel-Download"));
-            bool isChecked = isExcel.Selected;
-            if (!isChecked)
+            try
             {
-                isExcel.Click();
+                driver.Navigate().GoToUrl($"https://gocharting.com/terminal?ticker=NSE:{Symbol}");
+
+                await Task.Delay(7000); // wait for chart to load
+                var min3 = driver.FindElement(By.Id("interval-selector"));//("interval-selector-btn"));
+                min3.Click();
+                var mins3 = driver.FindElement(By.XPath("//*[@title='1 Minute']"));
+                mins3.Click();
+
+                Actions actions = new Actions(driver);
+
+                // Press ALT + D
+                //actions
+                //    .KeyDown(Keys.Alt)
+                //    .SendKeys("1")
+                //    .KeyUp(Keys.Alt)
+                //    .Perform();
+
+                var moreSettings = driver.FindElement(By.Id("more-features-btn"));
+                moreSettings.Click();
+                var isExcel = driver.FindElement(By.Id("Excel-Download"));
+                bool isChecked = isExcel.Selected;
+                if (!isChecked)
+                {
+                    isExcel.Click();
+                }
+                moreSettings.Click();
+                //var downloadBtn = driver.FindElement(By.XPath("//div[@title='Download to Excel']"));
+                //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                //IWebElement element = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.CssSelector("[class*='ExcelContainer']")));
+                //element.Click();
+
+                By parentBy = By.CssSelector("div.css-cu9v3.eoj6wn090");
+                By childBy = By.CssSelector("div.css-p0jopv.eb64bh74");
+
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+
+                IWebElement secondFromLast = wait.Until(d =>
+                {
+                    var parent = d.FindElement(parentBy);
+                    var items = parent.FindElements(childBy);
+                    return items.Count >= 2 ? items[items.Count - 2] : null;
+                });
+
+                secondFromLast.Click();
             }
-            moreSettings.Click();
-            //var downloadBtn = driver.FindElement(By.XPath("//div[@title='Download to Excel']"));
-            //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            //IWebElement element = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.CssSelector("[class*='ExcelContainer']")));
-            //element.Click();
-
-            By parentBy = By.CssSelector("div.css-cu9v3.eoj6wn090");
-            By childBy = By.CssSelector("div.css-p0jopv.eb64bh74");
-
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
-
-            IWebElement secondFromLast = wait.Until(d =>
+            catch (Exception ex)
             {
-                var parent = d.FindElement(parentBy);
-                var items = parent.FindElements(childBy);
-                return items.Count >= 2 ? items[items.Count - 2] : null;
-            });
+                Console.WriteLine($"Error occurred: {ex.Message}");
 
-            secondFromLast.Click();
+                // 1. Take the screenshot
+                if (driver is ITakesScreenshot ts)
+                {
+                    var screenshot = ts.GetScreenshot();
+                    string path = Path.Combine(Directory.GetCurrentDirectory(), "error_screenshots");
+                    if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+                    string fileName = $"failure_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+                    screenshot.SaveAsFile(Path.Combine(path, fileName));
+                    Console.WriteLine($"Screenshot saved: {fileName}");
+                }
+                throw; // Re-throw so GitHub Actions knows the job failed
+            }
             //var downloadBtn = driver.FindElement(By.CssSelector("[class*='ExcelContainer']"));
             //downloadBtn.Click();
 
