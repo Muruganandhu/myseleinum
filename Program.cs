@@ -268,7 +268,7 @@ namespace MySeleniumProject
                 var result = ConvertCsvToJson(lines, index, Symbol);
                 //  var marketData= JsonConvert.DeserializeObject<MarketData>(result);
                 await UploadTOAPI(result);
-                MoveProcessed(filePath, folderPath);
+               // MoveProcessed(filePath, folderPath);
                 Console.WriteLine($"{result}");
             }
             catch (Exception ex)
