@@ -71,7 +71,7 @@ namespace MySeleniumProject
         private static bool IsTradingHours()
         {
             DateTime istNow = GetISTTime();
-            if (istNow.DayOfWeek == DayOfWeek.Saturday || istNow.DayOfWeek == DayOfWeek.Sunday) return false;
+            if ( istNow.DayOfWeek == DayOfWeek.Sunday) return false;
 
             TimeSpan start = new TimeSpan(9, 0, 0);
             TimeSpan end = new TimeSpan(15, 30, 0);
