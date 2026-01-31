@@ -1,0 +1,28 @@
+name: Market Scraper Bot
+on:
+  schedule:
+    # 03:30 UTC = 09:00 IST (Market Open)
+    # Mon-Fri only
+    - cron: '30 3 * * 1-5'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+    # Stop the job after 7 hours (3:30 PM IST is 6.5 hours after open)
+    timeout-minutes: 420 
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: docker build -t trader-app .
+
+      - name: Run Scraper Container
+        run: |
+          docker run --rm \
+          -e GOCHART_EMAIL="${{ secrets.GOCHART_EMAIL }}" \
+          -e GOCHART_PASS="${{ secrets.GOCHART_PASS }}" \
+          -e SYMBOLS="NIFTY,BANKNIFTY,RELIANCE" \
+          trader-app
