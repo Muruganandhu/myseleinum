@@ -238,36 +238,43 @@ namespace MySeleniumProject
         private static async Task ProcessCSV(string folderPath, string Symbol)
 
         {
-            inputValue.Clear();
-            //set timeout for 2 seconds         to ensure file is completely written
-            await Task.Delay(2000);
-
-            string filePath = Directory.GetFiles(folderPath, "*.csv")
-                                       .OrderByDescending(f => File.GetCreationTime(f))
-                                       .FirstOrDefault();
-
-            if (filePath == null)
+            try
             {
-                Console.WriteLine("CSV file not found!");
-                return;
+                inputValue.Clear();
+                //set timeout for 2 seconds         to ensure file is completely written
+                await Task.Delay(2000);
+
+                string filePath = Directory.GetFiles(folderPath, "*.csv")
+                                           .OrderByDescending(f => File.GetCreationTime(f))
+                                           .FirstOrDefault();
+
+                if (filePath == null)
+                {
+                    Console.WriteLine("CSV file not found!");
+                    return;
+                }
+
+                string[] lines = await File.ReadAllLinesAsync(filePath);
+                if (lines.Length < 2) return;
+
+                string head = lines[0];
+                bool isEmptyHead = head.Contains("gocharting");
+                int index = 0;
+                if (isEmptyHead)
+                {
+                    index = 2;
+                }
+
+                var result = ConvertCsvToJson(lines, index, Symbol);
+                //  var marketData= JsonConvert.DeserializeObject<MarketData>(result);
+                await UploadTOAPI(result);
+                MoveProcessed(filePath, folderPath);
+                Console.WriteLine($"{result}");
             }
-
-            string[] lines = await File.ReadAllLinesAsync(filePath);
-            if (lines.Length < 2) return;
-
-            string head = lines[0];
-            bool isEmptyHead = head.Contains("gocharting");
-            int index = 0;
-            if (isEmptyHead)
+            catch (Exception ex)
             {
-                index = 2;
+                Console.WriteLine($"Error processing CSV: {ex.Message}");
             }
-
-            var result = ConvertCsvToJson(lines, index, Symbol);
-            //  var marketData= JsonConvert.DeserializeObject<MarketData>(result);
-            await UploadTOAPI(result);
-            MoveProcessed(filePath, folderPath);
-            Console.WriteLine($"{result}");
         }
         public static List<MarketData> CalculateCumulative(List<MarketData> data)
         {
@@ -384,18 +391,25 @@ namespace MySeleniumProject
         }
         private static void MoveProcessed(string path, string folderPath)
         {
-            Console.WriteLine("Moving files to processed");
-            string destinationDirectory = folderPath + "\\processed";
-            if (File.Exists(path))
+            try
             {
-                if (!Directory.Exists(destinationDirectory))
+                Console.WriteLine("Moving files to processed");
+                string destinationDirectory = folderPath + "\\processed";
+                if (File.Exists(path))
                 {
-                    Directory.CreateDirectory(destinationDirectory);
+                    if (!Directory.Exists(destinationDirectory))
+                    {
+                        Directory.CreateDirectory(destinationDirectory);
+                    }
+                    string extension = ".csv";
+                    string uniqueFileName = $"{DateTime.UtcNow.Ticks}{extension}";
+                    string destinationFilePath = Path.Combine(destinationDirectory, uniqueFileName);
+                    File.Move(path, destinationFilePath);
                 }
-                string extension = ".csv";
-                string uniqueFileName = $"{DateTime.UtcNow.Ticks}{extension}";
-                string destinationFilePath = Path.Combine(destinationDirectory, uniqueFileName);
-                File.Move(path, destinationFilePath);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Moving files proceesing: {ex.Message}");
             }
         }
         static double ParseDouble(string s)
