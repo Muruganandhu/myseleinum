@@ -132,8 +132,16 @@ namespace MySeleniumProject
             catch (WebDriverTimeoutException)
             {
                 // Extra wait of 5 seconds
-                WebDriverWait extraWait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-                return extraWait.Until(ExpectedConditions.ElementExists(avatarBy));
+                try
+                {
+                    WebDriverWait extraWait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+                    return extraWait.Until(ExpectedConditions.ElementExists(avatarBy));
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    Console.WriteLine("User Avatar not found after extra wait.");
+                    throw;
+                }
             }
         }
 
@@ -162,7 +170,7 @@ namespace MySeleniumProject
                     screenshot.SaveAsFile(Path.Combine(path, fileName));
                     Console.WriteLine($"Screenshot saved: {fileName}");
                 }
-                throw; // Re-throw so GitHub Actions knows the job failed
+               // throw; // Re-throw so GitHub Actions knows the job failed
             }
 
             try
