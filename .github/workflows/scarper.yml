@@ -26,3 +26,12 @@ jobs:
           -e GOCHART_PASS="${{ secrets.GOCHART_PASS }}" \
           -e SYMBOLS="NIFTY,BANKNIFTY,RELIANCE" \
           trader-app
+      - name: Upload Screenshots on Failure
+        # This only runs if the 'Run Scraper Container' step fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-screenshots
+          # Path inside the GITHUB_WORKSPACE (you may need to copy from docker first)
+          path: error_screenshots/
+          retention-days: 7
