@@ -24,7 +24,7 @@ jobs:
           docker run --rm \
           -e GOCHART_EMAIL="${{ secrets.GOCHART_EMAIL }}" \
           -e GOCHART_PASS="${{ secrets.GOCHART_PASS }}" \
-          -e SYMBOLS="NIFTY,BANKNIFTY,RELIANCE" \
+          -e SYMBOLS="NIFTY-I,ONGC,CUPID,BANKNIFTY,RELIANCE" \
           trader-app
       - name: Upload Screenshots on Failure
         # This only runs if the 'Run Scraper Container' step fails
